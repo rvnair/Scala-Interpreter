@@ -1,0 +1,24 @@
+a=0
+x=1
+if(a)
+  if(x)
+    ax=0
+  else
+    anx=1
+else
+  if(x)
+    nax=2
+  else
+    nanx=3
+print
+    a
+print
+    x
+print
+    ax
+print
+    anx
+print
+    nanx
+print
+    nax

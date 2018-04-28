@@ -1,0 +1,27 @@
+Team members:
+
+Rohan Nair
+Varun Rajaram
+Karthik Velayutham
+
+Project Idea:
+
+Our idea is to create an interpreter for the fun language in Scala. We want to expand the capability of the fun language to support the following:
+
+Existing functionality:
+	-Assignment
+	-Identifiers
+	-If-else statements
+	-While statements
+	-Print statements
+	-Support for addition and multiplication
+	-Support for functions (including recursive functions and functions that redefine themselves)
+	-New Proposed Functionality:
+	-Support for division and subtraction
+	-Support for for-loops
+	-If we have time, include support for immutable Strings
+
+By doing this, we hope to learn a new language and apply the skill we have developed in writing interpreters in a new and more challenging way.
+We also hope gain experience with functional programming through this project.
+
+
