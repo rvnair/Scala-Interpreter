@@ -131,7 +131,7 @@ object Interpreter {
                 }
             }
             else if(progText(pos).isDigit){
-                var num = 0
+                var num: Long = 0
                 while(pos < progText.length() && (progText(pos).isDigit || progText(pos) == '_')) {
                     if(progText(pos).isDigit) {
                         num *= 10
