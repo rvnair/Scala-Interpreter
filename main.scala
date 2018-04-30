@@ -2,8 +2,14 @@ import scala.io.Source
 import java.nio.file.Files
 import java.nio.file.Paths
 import scala.collection.mutable.ListBuffer
+import scala.collection.mutable.HashMap
+import scala.math.pow
 
 object Interpreter {
+
+    var tokList: List[Token] = null
+    var tokInd: Integer = 0
+    var symTab: HashMap[String, Long] = new HashMap()
 
     object Kind extends Enumeration {
     	val ELSE = Value("ELSE")
@@ -16,6 +22,7 @@ object Interpreter {
     	val LBRACE = Value("LBRACE")
     	val LEFT = Value("LEFT")
     	val MUL = Value("MUL")
+      val EXP = Value("EXP")
     	val NONE = Value("NONE")
     	val PLUS = Value("PLUS")
     	val PRINT = Value("PRINT")
@@ -36,12 +43,97 @@ object Interpreter {
             "(" + k + ": " + v + ", " + id + ")"
     }
 
+    def e1() = {
+        tokList(tokInd).kind match {
+            case Kind.INT => {
+                val value = tokList(tokInd).value
+                tokInd += 1
+                value
+            }
+            case _ => {
+                0
+            }
+        }
+    }
+
+    def e2() = {
+        var value = e1()
+        while(tokList(tokInd).kind == Kind.EXP) {
+            tokInd += 1
+            value = pow(value.toDouble, e1().toDouble).toInt
+        }
+        value
+    }
+    def e3() = {
+        var value = e2()
+        while(tokList(tokInd).kind == Kind.MUL) {
+            tokInd += 1
+            value *= e2()
+        }
+        value
+    }
+
+    def e4() = {
+        var value = e3()
+        while(tokList(tokInd).kind == Kind.PLUS) {
+            tokInd += 1
+            value += e3()
+        }
+        value
+    }
+
+    def e5() = {
+        var value = e4()
+        while(tokList(tokInd).kind == Kind.EQEQ) {
+            tokInd += 1
+            if(value == e4()){
+                value = 1
+            }
+            else {
+                value = 0
+            }
+        }
+        value
+    }
+
+    def expression() = {
+        e5()
+    }
+
+    def statement(doit: Boolean) = {
+        tokList(tokInd).kind match {
+            case Kind.PRINT => {
+                tokInd += 1
+                if(doit) {
+                    println(expression())
+                }
+                else {
+                    expression()
+                }
+                true
+            }
+            case _ => {
+                false
+            }
+        }
+    }
+
+    def seq(doit: Boolean) = {
+        while(statement(doit)){}
+    }
+
+    def program() = {
+        seq(true)
+    }
 
     def main(args: Array[String]): Unit = {
         val progText: String = new String(Files.readAllBytes(Paths.get(args(0))))
-        val tokList: List[Token] = tokenize(progText, false)
-        tokList.foreach(println)
+        tokList = tokenize(progText, false)
+        //tokList.foreach(println)
+        program()
     }
+
+
 
     def tokenize(progText: String, debug: Boolean) = {
         var pos = 0;
@@ -134,6 +226,7 @@ object Interpreter {
                 tokList += new Token(Kind.ID, 0, s.toString())
             }
         }
+        tokList += new Token(Kind.END, 0, "")
         val retTokList = tokList.toList
         if(debug){
             println(progText)
