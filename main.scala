@@ -22,7 +22,7 @@ object Interpreter {
     	val LBRACE = Value("LBRACE")
     	val LEFT = Value("LEFT")
     	val MUL = Value("MUL")
-      val EXP = Value("EXP")
+      	val EXP = Value("EXP")
     	val NONE = Value("NONE")
     	val PLUS = Value("PLUS")
     	val PRINT = Value("PRINT")
