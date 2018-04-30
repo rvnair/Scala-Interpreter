@@ -1,6 +1,7 @@
 import scala.io.Source
 import java.nio.file.Files
 import java.nio.file.Paths
+import scala.collection.mutable.ListBuffer
 
 object Interpreter {
 
@@ -26,18 +27,25 @@ object Interpreter {
     }
 
     import Kind._
+    class Token(k: Kind.Value, v: Long, id_in: String){
+        val kind: Kind.Value = k
+        val value: Long  = v
+        val id: String = id_in
+
+        override def toString(): String =
+            "(" + k + ": " + v + ", " + id + ")"
+    }
+
 
     def main(args: Array[String]): Unit = {
         val progText: String = new String(Files.readAllBytes(Paths.get(args(0))))
-//       val k: Value = Kind.MUL.Value
-        tokenize(progText, true)
+        val tokList: List[Token] = tokenize(progText, false)
+        tokList.foreach(println)
     }
 
-    def tokenize(progText: String, debug: Boolean): Unit = {
+    def tokenize(progText: String, debug: Boolean) = {
         var pos = 0;
-        if(debug){
-            println(progText)
-        }
+        var tokList = new ListBuffer[Token]()
         while(pos <= progText.length()) {
             if(pos == progText.length()) {
                 pos += 1
@@ -47,88 +55,62 @@ object Interpreter {
             }
             else if(progText(pos) == '{') {
                 pos += 1
-                if(debug) {
-                    println("(LBRACE)")
-                }
+                tokList += new Token(Kind.LBRACE, 0, "")
             }
             else if(progText(pos) == '(') {
                 pos += 1
-                if(debug) {
-                    println("(LEFT)")
-                }
+                tokList += new Token(Kind.LEFT, 0, "")
             }
             else if(progText(pos) == '*') {
                 pos += 1
-                if(debug) {
-                    println("(MUL)")
-                }
+                tokList += new Token(Kind.MUL, 0, "")
             }
             else if(progText(pos) == '+') {
                 pos += 1
-                if(debug) {
-                    println("(PLUS)")
-                }
+                tokList += new Token(Kind.PLUS, 0, "")
             }
             else if(progText(pos) == '}') {
                 pos += 1
-                if(debug) {
-                    println("(RBRACE)")
-                }
+                tokList += new Token(Kind.RBRACE, 0, "")
             }
             else if(progText(pos) == ')') {
                 pos += 1
-                if(debug) {
-                    println("(RIGHT)")
-                }
+                tokList += new Token(Kind.RIGHT, 0, "")
             }
             else if(progText(pos) == '=') {
                 if(progText(pos + 1) == '=') {
                     pos += 2
-                    if(debug) {
-                        println("(EQEQ)")
-                    }
+                    tokList += new Token(Kind.EQEQ, 0, "")
                 }
                 else{
                     pos += 1
-                    if(debug) {
-                        println("(EQ)")
-                    }
+                    tokList += new Token(Kind.EQ, 0, "")
                 }
             }
             else if(pos + 2 < progText.length() && (progText(pos) == 'i' && progText(pos + 1) == 'f'
                     && (progText(pos + 2).isWhitespace || progText(pos + 2) == '('))) {
                 pos += 2
-                if(debug) {
-                    println("(IF)")
-                }
+                tokList += new Token(Kind.IF, 0, "")
             }
             else if(pos + 3 < progText.length() && (progText(pos) == 'f' && progText(pos + 1) == 'u' && progText(pos + 2) == 'n'
                     && (progText(pos + 3).isWhitespace || progText(pos + 3) == '{'))) {
                 pos += 3
-                if(debug) {
-                    println("(FUN)")
-                }
+                tokList += new Token(Kind.FUN, 0, "")
             }
             else if(pos + 4 < progText.length() && (progText(pos) == 'e' && progText(pos + 1) == 'l' && progText(pos + 2) == 's' && progText(pos + 3) == 'e'
                     && (progText(pos + 4).isWhitespace || progText(pos + 4) == '(' || progText(pos + 4) == '{'))) {
                 pos += 4
-                if(debug) {
-                    println("(ELSE)")
-                }
+                tokList += new Token(Kind.ELSE, 0, "")
             }
             else if(pos + 5 < progText.length() && (progText(pos) == 'p' && progText(pos + 1) == 'r' && progText(pos + 2) == 'i' && progText(pos + 3) == 'n' && progText(pos + 4) == 't'
                     && (progText(pos + 5).isWhitespace || progText(pos + 5) == '('))) {
                 pos += 5
-                if(debug) {
-                    println("(PRINT)")
-                }
+                tokList += new Token(Kind.PRINT, 0, "")
             }
             else if(pos + 5 < progText.length() && (progText(pos) == 'w' && progText(pos + 1) == 'h' && progText(pos + 2) == 'i' && progText(pos + 3) == 'l' && progText(pos + 4) == 'e'
                     && (progText(pos + 5).isWhitespace || progText(pos + 5) == '('))) {
                 pos += 5
-                if(debug) {
-                    println("(WHILE)")
-                }
+                tokList += new Token(Kind.WHILE, 0, "")
             }
             else if(progText(pos).isDigit){
                 var num: Long = 0
@@ -141,9 +123,7 @@ object Interpreter {
                     }
                     pos += 1
                 }
-                if(debug) {
-                    println("(INT: " + num + ")")
-                }
+                tokList += new Token(Kind.INT, num, "")
             }
             else if(progText(pos).isLower){
                 var s: StringBuilder = new scala.collection.mutable.StringBuilder()
@@ -151,10 +131,14 @@ object Interpreter {
                     s.append(progText(pos))
                     pos += 1
                 }
-                if(debug) {
-                    println("(ID: " + s + ")")
-                }
+                tokList += new Token(Kind.ID, 0, s.toString())
             }
         }
+        val retTokList = tokList.toList
+        if(debug){
+            println(progText)
+            retTokList.foreach(println)
+        }
+        retTokList
     }
 }
