@@ -22,7 +22,7 @@ object Interpreter {
     	val LBRACE = Value("LBRACE")
     	val LEFT = Value("LEFT")
     	val MUL = Value("MUL")
-      	val EXP = Value("EXP")
+      val EXP = Value("EXP")
     	val NONE = Value("NONE")
     	val PLUS = Value("PLUS")
     	val PRINT = Value("PRINT")
@@ -43,11 +43,30 @@ object Interpreter {
             "(" + k + ": " + v + ", " + id + ")"
     }
 
-    def e1() = {
+    def e1(): Long = {
         tokList(tokInd).kind match {
+
+            case Kind.LEFT => {
+                tokInd += 1
+                val value = expression()
+                tokInd += 1
+                value
+            }
+            case Kind.FUN => {
+                val funInd: Long = tokInd.toLong
+                tokInd += 1
+                statement(false)
+                funInd
+            }
             case Kind.INT => {
                 val value = tokList(tokInd).value
                 tokInd += 1
+                value
+            }
+            case Kind.ID => {
+                val id = tokList(tokInd).id
+                tokInd += 1
+                var value: Long = symTab.getOrElse(id, 0)
                 value
             }
             case _ => {
@@ -56,7 +75,7 @@ object Interpreter {
         }
     }
 
-    def e2() = {
+    def e2(): Long = {
         var value = e1()
         while(tokList(tokInd).kind == Kind.EXP) {
             tokInd += 1
@@ -73,7 +92,7 @@ object Interpreter {
         value
     }
 
-    def e4() = {
+    def e4(): Long = {
         var value = e3()
         while(tokList(tokInd).kind == Kind.PLUS) {
             tokInd += 1
@@ -82,7 +101,7 @@ object Interpreter {
         value
     }
 
-    def e5() = {
+    def e5(): Long = {
         var value = e4()
         while(tokList(tokInd).kind == Kind.EQEQ) {
             tokInd += 1
@@ -96,12 +115,82 @@ object Interpreter {
         value
     }
 
-    def expression() = {
+    def expression(): Long = {
         e5()
     }
 
-    def statement(doit: Boolean) = {
+    def statement(doit: Boolean): Boolean = {
         tokList(tokInd).kind match {
+            case Kind.ID => {
+                val id: String = tokList(tokInd).id
+                tokInd += 1
+                if(tokList(tokInd).kind == Kind.LEFT) {
+                    if(doit) {
+                        tokInd += 1
+                        val tempTokInd = tokInd
+                        var v: Long = symTab.getOrElse(id, 0)
+                        tokInd = v.toInt
+                        //tokInd = symTab.getOrElse(id, 0).toInt
+                        tokInd += 1
+                        statement(doit)
+                        tokInd = tempTokInd
+                        tokInd += 1
+                    }
+                    else {
+                        tokInd += 2
+                    }
+                }
+                else {
+                    tokInd += 1
+                    val value = expression()
+                    if(doit){
+                        symTab.put(id, value)
+                    }
+                }
+                true
+            }
+            case Kind.LBRACE => {
+                tokInd += 1
+                seq(doit)
+                tokInd += 1
+                true
+            }
+            case Kind.IF => {
+                tokInd += 1
+                if(expression() > 0){
+                    statement(doit)
+                    if(tokList(tokInd).kind == Kind.ELSE) {
+                        tokInd += 1
+                        statement(false)
+                    }
+                }
+                else {
+                    statement(false)
+                    if(tokList(tokInd).kind == Kind.ELSE) {
+                        tokInd += 1
+                        statement(doit)
+                    }
+                }
+                true
+            }
+            case Kind.WHILE => {
+                val tempInd = tokInd
+                tokInd += 1
+                var eval = expression()
+                if(eval > 0 && doit) {
+                    while(eval > 0) {
+                        statement(doit)
+                        tokInd = tempInd
+                        tokInd += 1
+                        eval = expression()
+                    }
+                    statement(false)
+                }
+                else {
+                    statement(false)
+                }
+                true
+            }
             case Kind.PRINT => {
                 tokInd += 1
                 if(doit) {
@@ -132,8 +221,6 @@ object Interpreter {
         //tokList.foreach(println)
         program()
     }
-
-
 
     def tokenize(progText: String, debug: Boolean) = {
         var pos = 0;
