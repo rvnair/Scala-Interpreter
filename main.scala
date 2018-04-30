@@ -22,6 +22,8 @@ object Interpreter {
     	val LBRACE = Value("LBRACE")
     	val LEFT = Value("LEFT")
     	val MUL = Value("MUL")
+    	val SUB = Value("SUB")
+    	val DIV = Value("DIV")
       val EXP = Value("EXP")
     	val NONE = Value("NONE")
     	val PLUS = Value("PLUS")
@@ -79,24 +81,36 @@ object Interpreter {
         var value = e1()
         while(tokList(tokInd).kind == Kind.EXP) {
             tokInd += 1
-            value = pow(value.toDouble, e1().toDouble).toInt
+            value = pow(value.toDouble, e1().toDouble).toLong
         }
         value
     }
-    def e3() = {
+    def e3(): Long = {
         var value = e2()
-        while(tokList(tokInd).kind == Kind.MUL) {
-            tokInd += 1
-            value *= e2()
+        while((tokList(tokInd).kind == Kind.MUL) || (tokList(tokInd).kind == Kind.DIV)) {
+            if(tokList(tokInd).kind == Kind.MUL) {
+                tokInd += 1
+                value *= e2()
+            }
+            else {
+                tokInd += 1
+                value /= e2()
+            }
         }
         value
     }
 
     def e4(): Long = {
         var value = e3()
-        while(tokList(tokInd).kind == Kind.PLUS) {
-            tokInd += 1
-            value += e3()
+        while((tokList(tokInd).kind == Kind.PLUS) || (tokList(tokInd).kind == Kind.SUB)) {
+            if(tokList(tokInd).kind == Kind.PLUS) {
+                tokInd += 1
+                value += e3()
+            }
+            else {
+                tokInd += 1
+                value -= e3()
+            }
         }
         value
     }
@@ -240,9 +254,21 @@ object Interpreter {
                 pos += 1
                 tokList += new Token(Kind.LEFT, 0, "")
             }
+            else if(progText(pos) == '^') {
+                pos += 1
+                tokList += new Token(Kind.EXP, 0, "")
+            }
             else if(progText(pos) == '*') {
                 pos += 1
                 tokList += new Token(Kind.MUL, 0, "")
+            }
+            else if(progText(pos) == '/') {
+                pos += 1
+                tokList += new Token(Kind.DIV, 0, "")
+            }
+            else if(progText(pos) == '-') {
+                pos += 1
+                tokList += new Token(Kind.SUB, 0, "")
             }
             else if(progText(pos) == '+') {
                 pos += 1
