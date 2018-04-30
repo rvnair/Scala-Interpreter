@@ -144,7 +144,6 @@ object Interpreter {
                         val tempTokInd = tokInd
                         var v: Long = symTab.getOrElse(id, 0)
                         tokInd = v.toInt
-                        //tokInd = symTab.getOrElse(id, 0).toInt
                         tokInd += 1
                         statement(doit)
                         tokInd = tempTokInd
