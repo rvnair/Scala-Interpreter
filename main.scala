@@ -24,7 +24,7 @@ object Interpreter {
     	val MUL = Value("MUL")
     	val SUB = Value("SUB")
     	val DIV = Value("DIV")
-      val EXP = Value("EXP")
+        val EXP = Value("EXP")
     	val NONE = Value("NONE")
     	val PLUS = Value("PLUS")
     	val PRINT = Value("PRINT")
@@ -33,6 +33,8 @@ object Interpreter {
     	val SEMI = Value("SEMI")
     	val WHILE = Value("WHILE")
     	val FUN = Value("FUN")
+        val FOR = Value("FOR")
+        val NOT = Value("Not")
     }
 
     import Kind._
@@ -47,7 +49,6 @@ object Interpreter {
 
     def e1(): Long = {
         tokList(tokInd).kind match {
-
             case Kind.LEFT => {
                 tokInd += 1
                 val value = expression()
@@ -71,12 +72,22 @@ object Interpreter {
                 var value: Long = symTab.getOrElse(id, 0)
                 value
             }
+            case Kind.NOT => {
+                tokInd += 1
+                var value = expression()
+                if(value > 0){
+                    value = 0
+                }
+                else{
+                    value = 1
+                }
+                value
+            }
             case _ => {
                 0
             }
         }
     }
-
     def e2(): Long = {
         var value = e1()
         while(tokList(tokInd).kind == Kind.EXP) {
@@ -280,6 +291,10 @@ object Interpreter {
             else if(progText(pos) == ')') {
                 pos += 1
                 tokList += new Token(Kind.RIGHT, 0, "")
+            }
+            else if(progText(pos) == '!') {
+                pos += 1
+                tokList += new Token(Kind.NOT, 0, "")
             }
             else if(progText(pos) == '=') {
                 if(progText(pos + 1) == '=') {
