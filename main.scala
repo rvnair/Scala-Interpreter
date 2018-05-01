@@ -35,6 +35,8 @@ object Interpreter {
     	val FUN = Value("FUN")
         val FOR = Value("FOR")
         val NOT = Value("NOT")
+        val STRID = Value("STRID")
+        val STRING = Value("STRING")
     }
 
     import Kind._
@@ -215,6 +217,9 @@ object Interpreter {
                 }
                 true
             }
+            case Kind.FOR => {
+                //TODO: implement For loops in this form : for({statement};{expression};{statement}) {statement: loop body }
+            }
             case Kind.PRINT => {
                 tokInd += 1
                 if(doit) {
@@ -310,6 +315,11 @@ object Interpreter {
                     && (progText(pos + 2).isWhitespace || progText(pos + 2) == '('))) {
                 pos += 2
                 tokList += new Token(Kind.IF, 0, "")
+            }
+            else if(pos + 3 < progText.length() && (progText(pos) == 'f' && progText(pos + 1) == 'o' && progText(pos + 2) == 'r'
+                    && (progText(pos + 3).isWhitespace || progText(pos + 3) == '('))) {
+                pos += 3
+                tokList += new Token(Kind.FOR, 0, "")
             }
             else if(pos + 3 < progText.length() && (progText(pos) == 'f' && progText(pos + 1) == 'u' && progText(pos + 2) == 'n'
                     && (progText(pos + 3).isWhitespace || progText(pos + 3) == '{'))) {
