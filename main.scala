@@ -74,8 +74,8 @@ object Interpreter {
             }
             case Kind.NOT => {
                 tokInd += 1
-                var value = expression()
-                if(value > 0){
+                var value = e1()
+                if(value != 0){
                     value = 0
                 }
                 else{
