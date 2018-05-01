@@ -10,3 +10,8 @@ if !!(x-x)
     print x
 else
     print y
+
+if (!x - !!!y) + 1
+    print x
+else
+    print y
