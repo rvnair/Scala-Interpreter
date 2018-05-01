@@ -34,7 +34,7 @@ object Interpreter {
     	val WHILE = Value("WHILE")
     	val FUN = Value("FUN")
         val FOR = Value("FOR")
-        val NOT = Value("Not")
+        val NOT = Value("NOT")
     }
 
     import Kind._
