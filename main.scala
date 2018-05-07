@@ -145,7 +145,7 @@ object Interpreter {
             
 			if(tokList(tokInd).kind == Kind.AND){
             	tokInd += 1
-            	if (value != 0 && e4() != 0){
+            	if (e4() != 0 && value != 0){
             		value = 1
             	}
             	else {
