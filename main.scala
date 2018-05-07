@@ -218,7 +218,30 @@ object Interpreter {
                 true
             }
             case Kind.FOR => {
-                //TODO: implement For loops in this form : for({statement};{expression};{statement}) {statement: loop body }
+                //TODO: implement For loops in this form : for({statement};(expression);{statement}) {statement: loop body }
+                tokInd += 2
+                statement(doit)
+                val tempInd = tokInd
+                var eval = expression()
+                val endStatement = tokInd
+                statement(false)
+                tokInd += 1
+                val forStart = tokInd
+                if(eval != 0 && doit){
+                	while(eval > 0) {
+                		statement(doit)
+                		tokInd = endStatement
+                		statement(doit)
+                		tokInd = tempInd
+                		eval = expression()
+                		tokInd = forStart
+                	}
+                	statement(false)
+                }
+                else{
+                	statement(false)
+                }
+                false
             }
             case Kind.PRINT => {
                 tokInd += 1
