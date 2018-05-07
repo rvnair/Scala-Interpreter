@@ -133,26 +133,34 @@ object Interpreter {
     def e5(): Long = {
         var value = e4()
         while(tokList(tokInd).kind == Kind.EQEQ || tokList(tokInd).kind == Kind.AND || tokList(tokInd).kind == Kind.OR) {
-            tokInd += 1
-            if(tokList(tokInd).kind == Kind.EQEQ && value == e4()){
-                value = 1
+            if(tokList(tokInd).kind == Kind.EQEQ){
+            	tokInd += 1
+            	if (value == e4()){
+            		value = 1
+            	}
+            	else {
+            		value = 0
+            	}
             }
-            else {
-                value = 0
+            
+			if(tokList(tokInd).kind == Kind.AND){
+            	tokInd += 1
+            	if (value != 0 && e4() != 0){
+            		value = 1
+            	}
+            	else {
+            		value = 0
+            	}
             }
 
-			if(tokList(tokInd).kind == Kind.AND && (value != 0 && e4() != 0)){
-                value = 1
-            }
-            else {
-                value = 0
-            }
-
-            if(tokList(tokInd).kind == Kind.OR && (value != 0 || e4() != 0)){
-                value = 1
-            }
-            else {
-                value = 0
+            if(tokList(tokInd).kind == Kind.OR){
+            	tokInd += 1
+            	if (value != 0 || e4() != 0){
+            		value = 1
+            	}
+            	else {
+            		value = 0
+            	}
             }
         }
         value
