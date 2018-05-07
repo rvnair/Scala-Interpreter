@@ -35,6 +35,8 @@ object Interpreter {
     	val FUN = Value("FUN")
         val FOR = Value("FOR")
         val NOT = Value("NOT")
+        val AND = Value("AND")
+        val OR = Value("OR")
         val STRID = Value("STRID")
         val STRING = Value("STRING")
     }
@@ -130,9 +132,23 @@ object Interpreter {
 
     def e5(): Long = {
         var value = e4()
-        while(tokList(tokInd).kind == Kind.EQEQ) {
+        while(tokList(tokInd).kind == Kind.EQEQ || tokList(tokInd).kind == Kind.AND || tokList(tokInd).kind == Kind.OR) {
             tokInd += 1
-            if(value == e4()){
+            if(tokList(tokInd).kind == Kind.EQEQ && value == e4()){
+                value = 1
+            }
+            else {
+                value = 0
+            }
+
+			if(tokList(tokInd).kind == Kind.AND && (value != 0 && e4() != 0)){
+                value = 1
+            }
+            else {
+                value = 0
+            }
+
+            if(tokList(tokInd).kind == Kind.OR && (value != 0 || e4() != 0)){
                 value = 1
             }
             else {
@@ -323,6 +339,14 @@ object Interpreter {
             else if(progText(pos) == '!') {
                 pos += 1
                 tokList += new Token(Kind.NOT, 0, "")
+            }
+            else if(progText(pos) == '&') {
+            	pos += 1
+            	tokList += new Token(Kind.AND, 0, "")
+            }
+            else if(progText(pos) == '|') {
+            	pos += 1
+            	tokList += new Token(Kind.OR, 0, "")
             }
             else if(progText(pos) == '=') {
                 if(progText(pos + 1) == '=') {
