@@ -10,6 +10,7 @@ object Interpreter {
     var tokList: List[Token] = null
     var tokInd: Integer = 0
     var symTab: HashMap[String, Long] = new HashMap()
+    var strSymTab: HashMap[String, String] = new HashMap()
 
     object Kind extends Enumeration {
     	val ELSE = Value("ELSE")
@@ -24,7 +25,7 @@ object Interpreter {
     	val MUL = Value("MUL")
     	val SUB = Value("SUB")
     	val DIV = Value("DIV")
-        val EXP = Value("EXP")
+      val EXP = Value("EXP")
     	val NONE = Value("NONE")
     	val PLUS = Value("PLUS")
     	val PRINT = Value("PRINT")
@@ -33,12 +34,12 @@ object Interpreter {
     	val SEMI = Value("SEMI")
     	val WHILE = Value("WHILE")
     	val FUN = Value("FUN")
-        val FOR = Value("FOR")
-        val NOT = Value("NOT")
-        val AND = Value("AND")
-        val OR = Value("OR")
-        val STRID = Value("STRID")
-        val STRING = Value("STRING")
+      val FOR = Value("FOR")
+      val NOT = Value("NOT")
+      val AND = Value("AND")
+      val OR = Value("OR")
+      val STRID = Value("STRID")
+      val STRING = Value("STRING")
     }
 
     import Kind._
@@ -142,7 +143,7 @@ object Interpreter {
             		value = 0
             	}
             }
-            
+
 			if(tokList(tokInd).kind == Kind.AND){
             	tokInd += 1
             	if (e4() != 0 && value != 0){
@@ -172,6 +173,16 @@ object Interpreter {
 
     def statement(doit: Boolean): Boolean = {
         tokList(tokInd).kind match {
+            case Kind.STRID => {
+                if(tokList(tokInd + 1).kind == Kind.EQ) {
+                   val id: String = tokList(tokInd).id
+                   tokInd += 2
+                   val value: String = tokList(tokInd).id
+                   strSymTab.put(id, value)
+                   tokInd += 1
+                }
+                true
+            }
             case Kind.ID => {
                 val id: String = tokList(tokInd).id
                 tokInd += 1
@@ -268,12 +279,28 @@ object Interpreter {
                 false
             }
             case Kind.PRINT => {
-                tokInd += 1
-                if(doit) {
-                    println(expression())
+                if(tokList(tokInd + 1).kind == Kind.STRID){
+                    tokInd += 1
+                    val id: String = tokList(tokInd).id
+                    var strToPrint: String = strSymTab.getOrElse(id, "")
+                    println(strToPrint)
+                    tokInd += 1
+                }
+                else if(tokList(tokInd + 1).kind == Kind.LEFT && tokList(tokInd + 2).kind == Kind.STRID){
+                    tokInd += 2
+                    val id: String = tokList(tokInd).id
+                    var strToPrint: String = strSymTab.getOrElse(id, "")
+                    println(strToPrint)
+                    tokInd += 2
                 }
                 else {
-                    expression()
+                    tokInd += 1
+                    if(doit) {
+                        println(expression())
+                    }
+                    else {
+                        expression()
+                    }
                 }
                 true
             }
@@ -416,6 +443,24 @@ object Interpreter {
                     pos += 1
                 }
                 tokList += new Token(Kind.ID, 0, s.toString())
+            }
+            else if(progText(pos).isUpper){
+                var s: StringBuilder = new scala.collection.mutable.StringBuilder()
+                while(pos < progText.length() && progText(pos).isLetterOrDigit) {
+                    s.append(progText(pos))
+                    pos += 1
+                }
+                tokList += new Token(Kind.STRID, 0, s.toString())
+            }
+            else if(progText(pos) == '"'){
+                pos += 1
+                var s: StringBuilder = new scala.collection.mutable.StringBuilder()
+                while(progText(pos) != '"'){
+                    s.append(progText(pos))
+                    pos += 1
+                }
+                pos += 1
+                tokList += new Token(Kind.STRING, 0, s.toString())
             }
         }
         tokList += new Token(Kind.END, 0, "")
