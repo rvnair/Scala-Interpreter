@@ -25,7 +25,7 @@ object Interpreter {
     	val MUL = Value("MUL")
     	val SUB = Value("SUB")
     	val DIV = Value("DIV")
-      val EXP = Value("EXP")
+        val EXP = Value("EXP")
     	val NONE = Value("NONE")
     	val PLUS = Value("PLUS")
     	val PRINT = Value("PRINT")
@@ -34,12 +34,16 @@ object Interpreter {
     	val SEMI = Value("SEMI")
     	val WHILE = Value("WHILE")
     	val FUN = Value("FUN")
-      val FOR = Value("FOR")
-      val NOT = Value("NOT")
-      val AND = Value("AND")
-      val OR = Value("OR")
-      val STRID = Value("STRID")
-      val STRING = Value("STRING")
+        val FOR = Value("FOR")
+        val NOT = Value("NOT")
+        val AND = Value("AND")
+        val OR = Value("OR")
+        val STRID = Value("STRID")
+        val STRING = Value("STRING")
+        val LT = Value("LT")
+        val LTE = Value("LTE")
+        val GT = Value("GT")
+        val GTE = Value("GTE")
     }
 
     import Kind._
@@ -133,30 +137,71 @@ object Interpreter {
 
     def e5(): Long = {
         var value = e4()
+        while(tokList(tokInd).kind == Kind.LT || tokList(tokInd).kind == Kind.LTE || tokList(tokInd).kind == Kind.GT || tokList(tokInd).kind == Kind.GTE) {
+            if(tokList(tokInd).kind == Kind.LT){
+            	tokInd += 1
+            	if (value < e4()){
+            		value = 1
+            	}
+            	else {
+            		value = 0
+            	}
+            }
+			if(tokList(tokInd).kind == Kind.LTE){
+            	tokInd += 1
+            	if (value <= e4()){
+            		value = 1
+            	}
+            	else {
+            		value = 0
+            	}
+            }
+            if(tokList(tokInd).kind == Kind.GT){
+            	tokInd += 1
+            	if (value > e4()){
+            		value = 1
+            	}
+            	else {
+            		value = 0
+            	}
+            }
+            if(tokList(tokInd).kind == Kind.GTE){
+            	tokInd += 1
+            	if (value >= e4()){
+            		value = 1
+            	}
+            	else {
+            		value = 0
+            	}
+            }
+        }
+        value
+    }
+
+    def e6(): Long = {
+        var value = e5()
         while(tokList(tokInd).kind == Kind.EQEQ || tokList(tokInd).kind == Kind.AND || tokList(tokInd).kind == Kind.OR) {
             if(tokList(tokInd).kind == Kind.EQEQ){
             	tokInd += 1
-            	if (value == e4()){
+            	if (value == e5()){
             		value = 1
             	}
             	else {
             		value = 0
             	}
             }
-
 			if(tokList(tokInd).kind == Kind.AND){
             	tokInd += 1
-            	if (e4() != 0 && value != 0){
+            	if (e5() != 0 && value != 0){
             		value = 1
             	}
             	else {
             		value = 0
             	}
             }
-
             if(tokList(tokInd).kind == Kind.OR){
             	tokInd += 1
-            	if (value != 0 || e4() != 0){
+            	if (value != 0 || e5() != 0){
             		value = 1
             	}
             	else {
@@ -168,7 +213,7 @@ object Interpreter {
     }
 
     def expression(): Long = {
-        e5()
+        e6()
     }
 
     def statement(doit: Boolean): Boolean = {
@@ -391,6 +436,26 @@ object Interpreter {
                 else{
                     pos += 1
                     tokList += new Token(Kind.EQ, 0, "")
+                }
+            }
+            else if(progText(pos) == '<') {
+                if(progText(pos + 1) == '=') {
+                    pos += 2
+                    tokList += new Token(Kind.LTE, 0, "")
+                }
+                else{
+                    pos += 1
+                    tokList += new Token(Kind.LT, 0, "")
+                }
+            }
+            else if(progText(pos) == '>') {
+                if(progText(pos + 1) == '=') {
+                    pos += 2
+                    tokList += new Token(Kind.GTE, 0, "")
+                }
+                else{
+                    pos += 1
+                    tokList += new Token(Kind.GT, 0, "")
                 }
             }
             else if(pos + 2 < progText.length() && (progText(pos) == 'i' && progText(pos + 1) == 'f'
