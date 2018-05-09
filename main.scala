@@ -321,21 +321,25 @@ object Interpreter {
                 else{
                 	statement(false)
                 }
-                false
+                true
             }
             case Kind.PRINT => {
                 if(tokList(tokInd + 1).kind == Kind.STRID){
                     tokInd += 1
-                    val id: String = tokList(tokInd).id
-                    var strToPrint: String = strSymTab.getOrElse(id, "")
-                    println(strToPrint)
-                    tokInd += 1
+                    if(doit){
+	                    val id: String = tokList(tokInd).id
+	                    var strToPrint: String = strSymTab.getOrElse(id, "")
+	                    println(strToPrint)
+                	}
+                	tokInd += 1
                 }
                 else if(tokList(tokInd + 1).kind == Kind.LEFT && tokList(tokInd + 2).kind == Kind.STRID){
                     tokInd += 2
-                    val id: String = tokList(tokInd).id
-                    var strToPrint: String = strSymTab.getOrElse(id, "")
-                    println(strToPrint)
+                    if(doit){
+                    	val id: String = tokList(tokInd).id
+                    	var strToPrint: String = strSymTab.getOrElse(id, "")
+                    	println(strToPrint)
+                    }
                     tokInd += 2
                 }
                 else {
