@@ -35,3 +35,6 @@ function = fun {
 }
 
 function()
+
+Best = "Mo Salah"
+print Best
